@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Container for content */
+        body > div.wrapper {
+            max-width: 960px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px 40px 40px 40px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: 100%;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            color: #4b2a86;
+            text-align: center;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Styled Link Button */
+        a.add-product {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            box-shadow: 0 6px 15px rgba(118,75,162,0.4);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        a.add-product:hover {
+            background: #5a3675;
+            box-shadow: 0 8px 20px rgba(90,54,117,0.6);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #f7f7f8 0%, #e2e2e5 100%);
+        }
+
+        thead tr {
+            background: #764ba2;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-size: 0.9rem;
+            border-bottom: 4px solid #5a3675;
+        }
+
+        thead th {
+            padding: 16px 18px;
+        }
+
+        tbody tr {
+            transition: background-color 0.3s ease;
+            cursor: default;
+        }
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        tbody tr:hover {
+            background-color: #dcd6f7;
+        }
+
+        tbody td {
+            padding: 14px 18px;
+            font-size: 1rem;
+            color: #4e4b66;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        /* Special formatting for RoHS compliance */
+        tbody td:nth-child(4) {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        /* Styled Delete link */
+        a.delete-product {
+            background: #e94560;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(233,69,96,0.4);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        a.delete-product:hover {
+            background: #b8304b;
+            box-shadow: 0 7px 20px rgba(184,48,75,0.6);
+        }
+
+        /* No products row */
+        tbody tr.empty-row td {
+            font-style: italic;
+            color: #999;
+            padding: 30px 10px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 680px) {
+            body {
+                padding: 25px 10px;
+            }
+            body > div.wrapper {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 2rem;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+            thead th, tbody td {
+                padding: 10px 8px;
+            }
+            a.add-product {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            a.delete-product {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Products</h2>
+        <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+            <a href="{% url 'add_product' %}" class="add-product">➕ Add New Product</a>
+            <a href="{% url 'ocr_search' %}" class="add-product" style="background: #28a745;">🔍 OCR Search</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Device ID</th>
+                    <th>Batch ID</th>
+                    <th>Manufacturing Date</th>
+                    <th>RoHS Compliance</th>
+                    <th>Serial Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.device_id }}</td>
+                    <td>{{ product.batch_id }}</td>
+                    <td>{{ product.manufacturing_date }}</td>
+                    <td>{{ product.rohs_compliance }}</td>
+                    <td>{{ product.serial_number }}</td>
+                    <td>
+                        <a href="{% url 'delete_product' product.pk %}" class="delete-product">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="6">No products added yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

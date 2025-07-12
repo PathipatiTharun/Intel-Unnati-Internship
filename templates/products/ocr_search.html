@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OCR Serial Number Search</title>
+    <style>
+        /* Reset */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 30px 35px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            margin-bottom: 30px;
+            border: 1px solid #d4d2e2;
+        }
+        h2, h3 {
+            color: #4b2a86;
+            font-weight: 700;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        h4 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        p {
+            font-size: 1.05rem;
+            color: #5b507f;
+        }
+        /* Form styles */
+        form {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #6a5495;
+            font-size: 1rem;
+        }
+        .form-group input[type="file"],
+        .form-group input[type="text"],
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 2px solid #c9c7d4;
+            background: #f9f9fb;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: inherit;
+            color: #4e4b66;
+            outline-offset: 2px;
+            outline-color: transparent;
+        }
+        .form-group input[type="file"]:focus,
+        .form-group input[type="text"]:focus,
+        .form-group select:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(118,75,162,0.5);
+            outline-color: #764ba2;
+        }
+        button {
+            background: #764ba2;
+            color: white;
+            padding: 14px 28px;
+            font-size: 1.12rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            max-width: 250px;
+            align-self: flex-start;
+            box-shadow: 0 9px 25px rgba(118,75,162,0.55);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        button:hover {
+            background: #5a3675;
+            box-shadow: 0 12px 30px rgba(90,54,117,0.7);
+        }
+        /* Result boxes */
+        .result {
+            margin-top: 25px;
+            padding: 22px 28px;
+            border-radius: 14px;
+            font-size: 1rem;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            border: 1.5px solid transparent;
+        }
+        .success {
+            background-color: #e4f0e8;
+            border-color: #28a745;
+            color: #1e4620;
+        }
+        .error {
+            background-color: #f9d6d9;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d2eaf7;
+            border-color: #0c5460;
+            color: #0c5460;
+        }
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 15px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+            background: linear-gradient(135deg,#f7f7fa 0%,#ededf1 100%);
+        }
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1.4px solid #d6d3e1;
+            vertical-align: middle;
+            font-size: 1rem;
+            color: #5b507f;
+        }
+        th {
+            background-color: #ebe8f6;
+            font-weight: 700;
+            color: #4b2a86;
+            letter-spacing: 0.9px;
+            text-transform: uppercase;
+        }
+        /* Code blocks */
+        code {
+            background: #f0edf7;
+            padding: 3px 6px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 600;
+            color: #5b4d99;
+        }
+        pre {
+            background: #f8f9fc;
+            padding: 14px 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            color: #4b3e8a;
+            border: 1.5px solid #d6d3e1;
+            margin-top: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        /* Debug Section */
+        .debug-section {
+            margin-top: 25px;
+            background: #fafbfc;
+            padding: 25px 28px;
+            border-radius: 14px;
+            border-left: 6px solid #764ba2;
+            box-shadow: 0 2px 10px rgba(118,75,162,0.15);
+        }
+        .debug-item {
+            margin-bottom: 23px;
+            padding: 18px 24px;
+            background: white;
+            border-radius: 12px;
+            border: 1.5px solid #dbd9e3;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .debug-item:last-child {
+            margin-bottom: 0;
+        }
+        .debug-item h4 {
+            margin: 0 0 12px 0;
+            color: #764ba2;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: 0.7px;
+        }
+
+        /* Colored confidence text */
+        .conf-high {
+            color: #28a745;
+            font-weight: 700;
+        }
+        .conf-mid {
+            color: #ffc107;
+            font-weight: 700;
+        }
+        .conf-low {
+            color: #dc3545;
+            font-weight: 700;
+        }
+
+        /* Back to product list link */
+        .back-link {
+            display: inline-block;
+            margin-top: 35px;
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid transparent;
+            padding: 10px 30px;
+            border-radius: 30px;
+            box-shadow: 0 9px 25px rgba(118,75,162,0.45);
+            transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+        }
+        .back-link:hover {
+            background: #764ba2;
+            color: white;
+            box-shadow: 0 12px 30px rgba(90,54,117,0.7);
+            text-decoration: none;
+            border-color: #5a3675;
+        }
+
+        /* Responsive */
+        @media (max-width: 760px) {
+            body {
+                padding: 30px 15px;
+            }
+            .container {
+                padding: 25px 20px;
+            }
+            h2, h3 {
+                font-size: 1.6rem;
+            }
+            h4 {
+                font-size: 1.1rem;
+            }
+            p, td, th {
+                font-size: 0.95rem;
+            }
+            button {
+                width: 100%;
+                justify-content: center;
+                max-width: 100%;
+                padding: 14px 0;
+            }
+            .back-link {
+                width: 100%;
+                text-align: center;
+                padding: 12px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔍 Enhanced OCR Serial Number Search</h2>
+        <p><strong>Upload an image containing a serial number to search for products.</strong></p>
+        
+        <form method="post" enctype="multipart/form-data" id="ocrForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="cameraInput">Select Image or Scan with Camera:</label>
+                <input type="file" name="image" accept="image/*" id="cameraInput">
+                <button type="button" id="openCameraBtn" style="margin-top:10px;">📷 Open Camera</button>
+                <div id="cameraContainer" style="display:none; margin-top:15px;">
+                    <video id="video" width="320" height="240" autoplay style="border-radius:10px; border:1.5px solid #764ba2;"></video>
+                    <br>
+                    <button type="button" id="captureBtn" style="margin-top:10px;">Capture</button>
+                    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+                    <input type="hidden" name="captured_image" id="capturedImageInput">
+                </div>
+                <div style="font-size:0.98rem;color:#764ba2;margin-top:6px;">
+                    You can choose a file or use your device camera to scan the serial number directly.
+                </div>
+            </div>
+            <button type="submit">🔍 Upload &amp; Analyze</button>
+        </form>
+        <script>
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const video = document.getElementById('video');
+        const captureBtn = document.getElementById('captureBtn');
+        const canvas = document.getElementById('canvas');
+        const cameraInput = document.getElementById('cameraInput');
+        const capturedImageInput = document.getElementById('capturedImageInput');
+        const ocrForm = document.getElementById('ocrForm');
+
+        let stream = null;
+
+        openCameraBtn.addEventListener('click', async function() {
+            cameraContainer.style.display = 'block';
+            cameraInput.style.display = 'none';
+            openCameraBtn.style.display = 'none';
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+            } catch (err) {
+                alert('Could not access the camera.');
+                cameraContainer.style.display = 'none';
+                cameraInput.style.display = '';
+                openCameraBtn.style.display = '';
+            }
+        });
+
+        captureBtn.addEventListener('click', function() {
+            canvas.style.display = 'block';
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Stop the camera
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            // Convert canvas to data URL and set as hidden input
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], 'captured.jpg', { type: 'image/jpeg' });
+                // Create a DataTransfer to simulate file input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                cameraInput.files = dt.files;
+                cameraInput.style.display = 'none';
+            }, 'image/jpeg', 0.95);
+            video.style.display = 'none';
+            captureBtn.style.display = 'none';
+        });
+        </script>
+    </div>
+
+    {% if serial_number %}
+        <div class="container">
+            <h3>📋 OCR Results</h3>
+            <div class="result info">
+                <strong>Extracted Serial Number:</strong> <code>{{ serial_number }}</code>
+            </div>
+            
+            {% if result %}
+                <div class="result success">
+                    <h4>✅ Product Found!</h4>
+                    {% if result.rohs_compliance %}
+                        <div class="result info" style="margin-bottom: 10px;">
+                            <strong>🟢 This product is safe (RoHS Compliant)</strong>
+                        </div>
+                    {% endif %}
+                    <table>
+                        <tr>
+                            <th>Device ID</th>
+                            <td>{{ result.device_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Batch ID</th>
+                            <td>{{ result.batch_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Manufacturing Date</th>
+                            <td>{{ result.manufacturing_date }}</td>
+                        </tr>
+                        <tr>
+                            <th>RoHS Compliance</th>
+                            <td>{{ result.rohs_compliance|yesno:"Yes,No" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Serial Number</th>
+                            <td>{{ result.serial_number }}</td>
+                        </tr>
+                    </table>
+                </div>
+            {% else %}
+                <div class="result error">
+                    <h4>❌ No Product Found</h4>
+                    <p>No product found with serial number: <code>{{ serial_number }}</code></p>
+                    <p>Try uploading a clearer image or use the manual search below.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if ocr_debug_info %}
+        <div class="container">
+            <h3>🔧 OCR Debug Information</h3>
+            <div class="debug-section">
+                <p><strong>OCR Processing Details:</strong> The system tried multiple preprocessing methods and OCR configurations to extract the best possible text.</p>
+                
+                {% for debug_item in ocr_debug_info %}
+                    <div class="debug-item">
+                        {% if debug_item.error %}
+                            <h4>❌ Error</h4>
+                            <p>{{ debug_item.error }}</p>
+                        {% else %}
+                            <h4>🔍 Method: {{ debug_item.preprocessing }}</h4>
+                            <p><strong>OCR Config:</strong> <code>{{ debug_item.config }}</code></p>
+                            <p><strong>Extracted Serial:</strong> 
+                                {% if debug_item.extracted_serial %}
+                                    <code>{{ debug_item.extracted_serial }}</code>
+                                {% else %}
+                                    <span style="color: #dc3545;">None</span>
+                                {% endif %}
+                            </p>
+                            {% if debug_item.confidence %}
+                            <p><strong>Confidence Score:</strong> 
+                                <span class="{% if debug_item.confidence|floatformat:2 >= '0.7' %}conf-high{% elif debug_item.confidence|floatformat:2 >= '0.4' %}conf-mid{% else %}conf-low{% endif %}">
+                                    {{ debug_item.confidence }}
+                                </span>
+                            </p>
+                            {% endif %}
+                            <p><strong>Raw Text:</strong></p>
+                            <pre>{{ debug_item.raw_text }}</pre>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="container">
+        <h2>🔍 Manual Search</h2>
+        <p>Or search by entering the serial number manually:</p>
+        
+        <form method="get">
+            <div class="form-group">
+                <input type="text" name="manual_serial" placeholder="Enter Serial Number" value="{{ request.GET.manual_serial|default:'' }}">
+            </div>
+            <button type="submit">🔍 Search</button>
+        </form>
+        
+        {% if request.GET.manual_serial %}
+            <div class="result info" style="margin-top: 25px;">
+                <h3>Searched Serial Number: <code>{{ request.GET.manual_serial }}</code></h3>
+                
+                {% if manual_result %}
+                    <div class="result success" style="margin-top: 15px;">
+                        <h4>✅ Product Found!</h4>
+                        {% if manual_result.rohs_compliance %}
+                            <div class="result info" style="margin-bottom: 10px;">
+                                <strong>🟢 This product is RoHS Compliant</strong>
+                            </div>
+                        {% else %}
+                            <div class="result error" style="margin-bottom: 10px;">
+                                <strong>🔴 This product is NOT RoHS Compliant</strong>
+                            </div>
+                        {% endif %}
+                        <table>
+                            <tr>
+                                <th>Device ID</th>
+                                <td>{{ manual_result.device_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Batch ID</th>
+                                <td>{{ manual_result.batch_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Manufacturing Date</th>
+                                <td>{{ manual_result.manufacturing_date }}</td>
+                            </tr>
+                            <tr>
+                                <th>RoHS Compliance</th>
+                                <td>{{ manual_result.rohs_compliance|yesno:"Yes,No" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Serial Number</th>
+                                <td>{{ manual_result.serial_number }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="result error" style="margin-top: 15px;">
+                        <h4>❌ No Product Found</h4>
+                        <p>No product found with serial number: <code>{{ request.GET.manual_serial }}</code></p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'product_list' %}" class="back-link">← Back to Product List</a>
+</body>
+</html>
